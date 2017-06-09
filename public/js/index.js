@@ -8,7 +8,6 @@ socket.on('disconnect',function(){
 });
 
 socket.on('newMessage',function(message){
-    console.log(message);
     let li = $('<li></li>');
     li.text(`${message.from}: ${message.text}`);
     $('#messages').append(li);
@@ -23,13 +22,16 @@ socket.on('newLocationMessage',function (message) {
     $('#messages').append(li);
 });
 
+
 $('#message-form').on('submit',function (e) {
     e.preventDefault();
+
+    let messageTextBox = $('[name=message]');
     socket.emit('createMessage',{
         from:'User',
-        text:$('[name=message]').val()
+        text:messageTextBox.val()
     },function(){
-
+        messageTextBox.val('');
     });
 });
 
@@ -38,12 +40,16 @@ locationButton.on('click',function () {
    if(!'geolocation'in navigator){
        return alert('Geolocation is not supported');
    }
+
+   locationButton.attr('disabled','disabled').text('Sending...');
    navigator.geolocation.getCurrentPosition(function (position) {
+       locationButton.removeAttr('disabled').text('Send Location');;
         socket.emit('createLocationMessage',{
             latitude:position.coords.latitude,
             longitude:position.coords.longitude
         });
    },function (err) {
+       locationButton.removeAttr('disabled').text('Send Location');;
        alert('Unable to share the location');
    });
 });
